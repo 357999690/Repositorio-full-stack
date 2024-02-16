@@ -12,7 +12,7 @@ const requestLogger = (request, resp0nse, next) => {
 }
 
 
-
+app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
 app.use(requestLogger)
