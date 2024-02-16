@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
+const cors = require('cors')
 
 const requestLogger = (request, resp0nse, next) => {
     console.log('Method: ', request.method)
@@ -12,7 +13,7 @@ const requestLogger = (request, resp0nse, next) => {
 
 
 
-
+app.use(cors())
 app.use(express.json())
 app.use(requestLogger)
 
@@ -117,7 +118,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 3010
+const PORT = 3012
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
