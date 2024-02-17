@@ -16,8 +16,10 @@ const update = (id, newObejct) => {
     return request.then(response => response.data)
 }
 
-export default {
+const exportService = {
     getAll,
     create,
     update
 }
+
+export default exportService
