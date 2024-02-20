@@ -1,10 +1,38 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
+// const mongoose = require('mongoose')
+const Note = require('./models/note')
+
+
 
 app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
+
+// const password = process.argv[2]
+
+// const url = `mongodb+srv://lucaa20:${password}@cluster0.7qsrmix.mongodb.net/noteApp?retryWrites=true&w=majority`
+
+// mongoose.set('strictQuery', false)
+// mongoose.connect(url)
+
+
+// const noteSchema = new mongoose.Schema({
+//     content:String,
+//     important: Boolean,
+// })
+
+// noteSchema.set('toJSON', {
+//     transform: (document, returnedObject) => {
+//         returnedObject.id = returnedObject._id.toString()
+//         delete returnedObject._id
+//         delete returnedObject.__v
+//     }
+// })
+
+// const Note = mongoose.model('Note', noteSchema)
 
 let notes = [
     {
@@ -29,23 +57,31 @@ app.get('/',(request, response) => {
 })
 
 app.get('/api/notes',(request, response) => {
-    response.json(notes)
+    Note.find({}).then(notes => {
+        response.json(notes)
+    })
 })
 
 app.get('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    
-    const note = notes.find( note => note.id === id
-        
-        
-    )
-    
-    if(note){
+    Note.findById(request.params.id).then(note => {
         response.json(note)
-    }else{
-        response.status(404).end()
-    }
+    })
 })
+
+// app.get('/api/notes/:id', (request, response) => {
+//     const id = Number(request.params.id)
+    
+//     const note = notes.find( note => note.id === id
+        
+        
+//     )
+    
+//     if(note){
+//         response.json(note)
+//     }else{
+//         response.status(404).end()
+//     }
+// })
 
 
 app.delete('/api/notes/:id', (request, response) => {
@@ -65,26 +101,30 @@ const generateId = () => {
 app.post('/api/notes', (request, response) => {
     const body = request.body
 
-    if(!body.content){
+    if(body.content === undefined){
         return response.status(400).json({
             error: 'content missing'
         })
     }
 
-    const note = {
+    const note = new Note( {
         content: body.content,
-        important: Boolean(body.important) || false,
-        id: generateId(),
-    }
+        important: body.important || false,
+        
+    })
 
-    notes = notes.concat(note)
+    note.save().then(savedNote => {
+        response.json(savedNote)
+    })
 
-    response.json(note)
+    
+
+    
     
 })
 
 
-const PORT = process.env.PORT || 3016
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`)
 })
