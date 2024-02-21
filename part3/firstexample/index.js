@@ -59,7 +59,7 @@ app.get('/',(request, response) => {
 app.get('/api/notes',(request, response) => {
     Note.find({}).then(notes => {
         response.json(notes)
-        console.log(notes)
+        
     })
 })
 
