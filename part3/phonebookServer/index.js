@@ -26,30 +26,7 @@ app.use(morgan(' :method :url :status :response-time ms - :body'))
 
 
 
-// let persons = [
-//     {
-//         id: 1,
-//         name: "Arto Hellas",
-//         number: "040-123456"
-//     },
-//     {
-//         id: 2,
-//         name: "Ada Lovelace",
-//         number: "39-44-532345"
-//     },
-//     {
-//         id: 3,
-//         name: "Dan Abramov",
-//         number: "12-43-234345"
-//     },
-//     {
-//         id: 4,
-//         name: "Mary Poppendieck",
-//         number: "39-23-6423122"
-//     }
-// ]
 
-// 
 app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
         response.json(persons)
@@ -75,61 +52,21 @@ app.get('/api/persons/:id', (request, response) => {
     })
 })
 
-// app.delete('/api/persons/:id', (request, response) => {
-//     const id = Number(request.params.id)
-//     persons = persons.filter(person => person.id !== id)
-
-//     response.status(204).end()
-// })
-
-// const generateId = () => {
-//     const maxId = persons.length > 0
-//         ? Math.max(...persons.map(p => p.id))
-//         : 0
-//     return maxId + 1
-// }
-
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
-    if(body.name === undefined){
-        return response.status(400).json({
-            error: "name missing"
-        })
-    }
-
-    if(body.number === undefined){
-        return response.status(400).json({
-            error: 'number missing'
-        })
-    }
-
-    // const personFind = persons.find(person => person.name === body.name)
-
-    // if(personFind){
-    //     return response.status(400).json({
-    //         error: "name must be unique"
-    //     })
-    // }
-
-    const person = new Person({
+   const person = new Person({
         name : body.name,
         number: body.number,
     })
 
-    person.save().then(savedPerson => {
+    person.save()
+    .then(savedPerson => {
         response.json(savedPerson)
     })
+    .catch(error => next(error))
 
-    // const person = {
-    //     id: generateId(),
-    //     name: body.name,
-    //     number: body.number
-    // }
-
-    // persons = persons.concat(person)
-
-    // response.json(person)
+    
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -141,15 +78,12 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-    const body = request.body
+    const { name, number } = request.body
 
-    const person = {
-        name : body.name,
-        number : body. number
-
-    }
-
-    Person.findByIdAndUpdate(request.params.id, person, {new: true})
+    Person.findByIdAndUpdate(request.params.id,
+        { name, number },
+        {new: true, runValidators: true, context: 'query'})
+        
         .then(updatePerson => {
             response.json(updatePerson)
         })
@@ -167,6 +101,8 @@ const errorHandler = (error, request, response, next) =>{
 
     if (error.name === 'CastError') {
         return response.status(400).send({error : 'malformatted id'})
+    }else if(error.name === 'ValidationError'){
+        return response.status(400).json({error: error.message})
     }
 
     next(error)
