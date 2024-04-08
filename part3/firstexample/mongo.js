@@ -1,39 +1,34 @@
 const mongoose = require('mongoose')
 
-if(process.argv.length<3) {
-  console.log('give password as argument')
-  process.exit(1)
-}
+mongoose.set('strictQuery', false)
 
-const password = process.argv[2]
+const url = 'mongodb+srv://lucaa20:LucasSimbron91@cluster0.7qsrmix.mongodb.net/testNotes?retryWrites=true&w=majority'
 
-const url =
-    `mongodb+srv://lucaa20:${password}@cluster0.7qsrmix.mongodb.net/noteApp?retryWrites=true&w=majority`
+console.log('connecting to', url)
 
-mongoose.set('strictQuery',false)
+
 mongoose.connect(url)
+  .then(() => {
+    console.log('connected to MongoDb')
+  })
+  .catch((error) => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
 
-const noteSchema = new mongoose.Schema({
+const testNoteSchema = new mongoose.Schema({
   content: String,
   important: Boolean,
 })
 
-const Note = mongoose.model('Note', noteSchema)
+const TestNote = mongoose.model('TestNote', testNoteSchema)
 
-const note = new Note({
-  content:'HTML is easy',
-  important: true,
+const testNote = new TestNote({
+  content: 'HTML is yu',
+  important: true
 })
 
-// note.save().then(result => {
-//     console.log('note saved!')
-//     mongoose.connection.close()
-// })
-
-Note.find({}).then(result => {
-  result.forEach(note => {
-    console.log(note)
+testNote.save()
+  .then(() => {
+    console.log('note saved!')
+    mongoose.connection.close()
   })
-
-  mongoose.connection.close()
-})
