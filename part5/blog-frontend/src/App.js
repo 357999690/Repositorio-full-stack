@@ -20,6 +20,7 @@ const App = () => {
     getAllService.getAll().then(blogs =>
       setBlogs(blogs)
       
+      
       )
   }, [])
 
@@ -28,17 +29,23 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
+      getAllService.setToken(user.token)
     }
   }, [])
 
   const handleLogin = async (event) => {
     event.preventDefault()
+    // console.log('hola')
 
     try {
       const user = await login({
         username, password
       })
 
+      // window.localStorage.setItem(
+      //   'loggedBlogappUser', JSON.stringify(user)
+      // )
+      // getAllService.setToken(user.token)
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
       )
@@ -46,6 +53,7 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
+      // console.log(user.token)
     } catch (exception) {
       setErroMessage('Wrong credentials')
       setTimeout(() => {
@@ -57,22 +65,46 @@ const App = () => {
   const handleCreate = (event) => {
     event.preventDefault()
     
-    // const newBlog = {
-    //   title: title,
-    //   author: author,
-    //   url: url,
-    // }
-    getAllService.create()
+    const newObject = {
+      title: title,
+      author: author,
+      url: url,
+    } 
 
-    // getAllService
-    //   .create(newBlog)
-    //   .then(returnedBlog => {
-    //     setBlogs(blogs.concat(returnedBlog))
-    //     setTitle('')
-    //     setAuthor('')
-    //     setUrl('')
-    //   })
+    getAllService
+      .create(newObject)
+      .then(returnedBlog => {
+        setBlogs(blogs.concat(returnedBlog),
+        setTitle(''),
+        setAuthor(''),
+        setUrl(''))
+      })
   }
+
+  // const handleCreate = (event) => {
+  //   event.preventDefault()
+    
+    
+  //   // const newBlog = {
+  //   //   title: title,
+  //   //   author: author,
+  //   //   url: url,
+  //   // }
+    
+
+  //   // getAllService
+  //   //   .create({
+  //   //     title,
+  //   //     author,
+  //   //     url
+  //   //   })
+  //   //   .then(returnedBlog => {
+  //   //     setBlogs(blogs.concat(returnedBlog))
+  //   //     setTitle('')
+  //   //     setAuthor('')
+  //   //     setUrl('')
+  //   //   })
+  // }
   
 
   const handleLogout = () => {
